@@ -1,0 +1,14 @@
+$Members = Get-ADGroupMember -Recursive "_AM-US-Employees"
+$Obj = @()
+ForEach ($Member in $Members)
+{
+$User = Get-ADUser -Filter {Name -eq $Member.name -and Enabled -eq 'True'} -Properties *
+$GroupObj = New-Object PSObject
+$GroupObj | Add-Member -MemberType NoteProperty -Name "Email" -Value $User.EmailAddress
+$GroupObj | Add-Member -MemberType NoteProperty -Name "First Name" -Value $User.GivenName
+$GroupObj | Add-Member -MemberType NoteProperty -Name "Last Name" -Value $User.Surname
+$GroupObj | Add-Member -MemberType NoteProperty -Name "Department" -Value $User.Department
+$GroupObj | Add-Member -MemberType NoteProperty -Name "Group" -Value (($User.canonicalname -Split "/")[-2])
+$Obj += $GroupObj
+}
+$Obj | Export-Csv users.csv -NoTypeInformation
